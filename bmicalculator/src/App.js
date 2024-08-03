@@ -31,8 +31,8 @@ const App = () => {
           <input type="range" min="140" max="220" onChange={heightChange} />
         </div>
         <div className="output">
-          <p>Your BMI:</p>
-          <p>{output}</p>
+          <p id="output-head">Your BMI:</p>
+          <p id="output-res">{output}</p>
         </div>
       </div>
     </div>

@@ -1,27 +1,90 @@
-/* * {
-  padding: 0;
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap");
+* {
   margin: 0;
+  padding: 0;
   box-sizing: border-box;
-  background-color: antiquewhite;
- 
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90vh;
+  background-color: bisque;
 }
 
 .bmi-calc {
-  width: 100%;
-  height: 100%;
+  background-color: #f0f0f0;
+  width: 600px;
+  height: max-content;
   display: flex;
-  flex-direction: column;
-  text-align: center;
-  margin-top: 300px;
-}
-
-h1 {
-  font-size: 50px;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 10px 10px 4px #0000ff26;
+  border-radius: 12px;
 }
 
 .wrapper {
-  width: 500px;
-  background-color: white;
-  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 20px;
+  width: 90%;
 }
- */
+
+h1 {
+  font-family: "Playfair Display", serif;
+  font-weight: 600;
+  font-size: 50px;
+  background: salmon;
+  width: 100%;
+  width: 600px;
+  text-align: center;
+  border-radius: 12px 12px 0px 0px;
+  padding: 15px;
+}
+
+.height, .weight {
+  width: 100%;
+}
+
+input {
+  width: 100%;
+  padding: 2px;
+  /* border: 2px solid rgb(255, 0, 0); */
+}
+
+.weight p {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 20px;
+}
+
+.height p {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 20px;
+}
+
+.output {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  gap: 12px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+#output-head {
+  height: max-content;
+  width: max-content;
+  background-color: rgb(168, 237, 17);
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-weight: 400;
+  font-size: 20px;
+}
+
+#output-res {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
