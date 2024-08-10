@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+import './calc.css'
 
 const Calculator = () => {
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState("0");
 
   const CalculateResult = (input) => {
     let res;
@@ -16,6 +17,10 @@ const Calculator = () => {
         }
       }
 
+      if(!operator){
+        setInput(parseFloat(input).toString());
+        return;
+      }
       const [operand1, operand2] = input.split(operator).map(parseFloat);
 
       switch (operator) {
@@ -68,31 +73,31 @@ const Calculator = () => {
     <div className="main">
       <div className="calc">
         <h1>{input}</h1>
-        <div>
+        <div className="btns"> 
           <button onClick={() => handleClick("Del")}>Del</button>
           <button onClick={() => handleClick("AC")}>AC</button>
           <button onClick={() => handleClick("%")}>%</button>
           <button onClick={() => handleClick("/")}>/</button>
         </div>
-        <div>
+        <div  className="btns">
           <button onClick={() => handleClick("7")}>7</button>
           <button onClick={() => handleClick("8")}>8</button>
           <button onClick={() => handleClick("9")}>9</button>
           <button onClick={() => handleClick("x")}>x</button>
         </div>
-        <div>
+        <div  className="btns">
           <button onClick={() => handleClick("4")}>4</button>
           <button onClick={() => handleClick("5")}>5</button>
           <button onClick={() => handleClick("6")}>6</button>
           <button onClick={() => handleClick("+")}>+</button>
         </div>
-        <div>
+        <div  className="btns">
           <button onClick={() => handleClick("1")}>1</button>
           <button onClick={() => handleClick("2")}>2</button>
           <button onClick={() => handleClick("3")}>3</button>
           <button onClick={() => handleClick("-")}>-</button>
         </div>
-        <div>
+        <div  className="btns">
           <button onClick={() => handleClick("0")}>0</button>
           <button onClick={() => handleClick("00")}>00</button>
           <button onClick={() => handleClick(".")}>.</button>
