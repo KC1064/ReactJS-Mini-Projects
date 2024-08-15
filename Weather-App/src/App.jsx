@@ -21,7 +21,7 @@ const App = () => {
         .then((data) => {
           console.log(data);
           setWeather(data);
-          setError(false);  
+          setError(false);
           setPlace("");
         })
         .catch((err) => {
@@ -31,8 +31,38 @@ const App = () => {
     }
   };
 
+  const getVideoSource = () => {
+    if (weather.weather) {
+      const description = weather.weather[0].description.toLowerCase();
+      if (description.includes("rain")) {
+        return "src/assets/rainy-weather.mp4";
+      } else if (description.includes("clear")) {
+        return "src/assets/clear-sky.mp4";
+      }
+    }
+    return "src/assets/default-weather.mp4";
+  };
+
   return (
-    <div>
+    <div style={{ position: "relative", height: "100vh", color: "white" }}>
+      {weather.weather && (
+        <video
+          autoPlay
+          muted
+          loop
+          style={{
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            zIndex: -1,
+          }}
+        >
+          <source src={getVideoSource()} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      )}
+
       <input
         type="text"
         placeholder="Search..."
@@ -45,7 +75,7 @@ const App = () => {
       ) : (
         weather.main && (
           <div>
-            <p>{weather.main.temp} °C</p>
+            <p>{weather.main.temp}°C</p>
             <p>{weather.weather[0].description}</p>
           </div>
         )
@@ -55,3 +85,9 @@ const App = () => {
 };
 
 export default App;
+
+// NOTE:
+// - Add different bgs according to weather
+// - Add styling 
+// - Thinking of adding magical Ui
+// - will use tailwind 
