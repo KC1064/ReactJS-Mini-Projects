@@ -88,6 +88,69 @@ export default App;
 
 // NOTE:
 // - Add different bgs according to weather
-// - Add styling 
+// - Add styling
 // - Thinking of adding magical Ui
-// - will use tailwind 
+// - will use tailwind
+
+// Different weather conditions:
+
+// 1. **Clear**
+//    - `"clear sky"`
+
+// 2. **Cloudy**
+//    - `"few clouds"`
+//    - `"scattered clouds"`
+//    - `"broken clouds"`
+//    - `"overcast clouds"`
+
+// 3. **Rainy**
+//    - `"light rain"`
+//    - `"moderate rain"`
+//    - `"heavy intensity rain"`
+//    - `"very heavy rain"`
+//    - `"extreme rain"`
+//    - `"freezing rain"`
+//    - `"light intensity shower rain"`
+//    - `"shower rain"`
+//    - `"heavy intensity shower rain"`
+//    - `"ragged shower rain"`
+
+// 4. **Thunderstorm**
+//    - `"thunderstorm with light rain"`
+//    - `"thunderstorm with rain"`
+//    - `"thunderstorm with heavy rain"`
+//    - `"light thunderstorm"`
+//    - `"thunderstorm"`
+//    - `"heavy thunderstorm"`
+//    - `"ragged thunderstorm"`
+//    - `"thunderstorm with light drizzle"`
+//    - `"thunderstorm with drizzle"`
+//    - `"thunderstorm with heavy drizzle"`
+
+// 5. **Snowy**
+//    - `"light snow"`
+//    - `"snow"`
+//    - `"heavy snow"`
+//    - `"sleet"`
+//    - `"light shower sleet"`
+//    - `"shower sleet"`
+//    - `"light rain and snow"`
+//    - `"rain and snow"`
+//    - `"light shower snow"`
+//    - `"shower snow"`
+//    - `"heavy shower snow"`
+
+// 6. **Foggy/Misty**
+//    - `"mist"`
+//    - `"fog"`
+//    - `"haze"`
+
+// 7. **Dusty/Sandy**
+//    - `"sand"`
+//    - `"dust"`
+//    - `"smoke"`
+//    - `"volcanic ash"`
+
+// 8. **Extreme**
+//    - `"squalls"`
+//    - `"tornado"`
