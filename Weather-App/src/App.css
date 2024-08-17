@@ -19,3 +19,7 @@
 input {
   border: 6px solid white;
 }
+
+.attributes {
+  border: 2px solid white;
+}

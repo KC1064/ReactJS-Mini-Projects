@@ -31,6 +31,7 @@ const App = () => {
           setWeather(data);
           setError(false);
           setPlace("");
+          console.log(data);
         })
         .catch((err) => {
           console.error(err);
@@ -138,6 +139,13 @@ const App = () => {
     }
   };
 
+  const formatTime = (timestamp) => {
+    if (timestamp) {
+      return moment.unix(timestamp).format("HH:mm A");
+    }
+    return "N/A";
+  };
+
   return (
     <div
       className="bg-[#333744]"
@@ -168,7 +176,7 @@ const App = () => {
             <div className="">
               <div className="h-[780px] mt-6 w-[100%] flex justify-center items-center">
                 <div className="weather-details h-[740px] w-[96%] border border-slate-300 rounded-lg backdrop-blur-xl bg-opacity-30 bg-slate-500 flex flex-col items-center">
-                  <div className="place-date text-white mt-8 flex flex-col items-center">
+                  <div className="place-date text-white mt-4 flex flex-col items-center">
                     <p className="text-5xl">{weather.name}</p>
                     <p className="mt-2 text-xl">
                       {dayName.toUpperCase()}
@@ -189,16 +197,18 @@ const App = () => {
                     {weather.weather[0].description.toUpperCase()}
                   </p>
                   <p className="text-lg text-white">{greet()}</p>
-                  <div className="h-[300px] w-[95%] border-white flex gap-[90px] mt-4 justify-center">
-                    <div className="text-white text-xl flex flex-col gap-3">
-                      <p>Humidity: 76%</p>
-                      <p>Humidity: 76%</p>
-                      <p>Humidity: 76%</p>
+                  <div className="h-[200px] w-[94%] attributes border-white flex gap-[70px] mt-6 justify-center items-center">
+                    <div className="text-white text-lg flex flex-col gap-2">
+                      <p>Feels Like: {weather.main.feels_like}</p>
+                      <p>Max Temp: {weather.main.temp_max}</p>
+                      <p>Sunrise: {formatTime(weather.sys.sunrise)}</p>
+                      <p>Pressure: {weather.main.pressure}</p>
                     </div>
-                    <div className="text-white text-xl flex flex-col gap-3">
-                      <p>Humidity: 76%</p>
-                      <p>Humidity: 76%</p>
-                      <p>Humidity: 76%</p>
+                    <div className="text-white text-lg flex flex-col gap-2">
+                      <p>Humidity: {weather.main.humidity}</p>
+                      <p>Min Temp: {weather.main.temp_min}</p>
+                      <p>Sunset: {formatTime(weather.sys.sunset)}</p>
+                      <p>Wind Speed: {weather.wind.speed}</p>
                     </div>
                   </div>
                 </div>
@@ -213,34 +223,3 @@ const App = () => {
 };
 
 export default App;
-
-// NOTE:
-// - Add different bgs according to weather
-// - Add styling
-// - Thinking of adding magical Ui
-// - will use tailwind
-
-// Different weather conditions:
-// 1. Clear sky
-// 2. few clouds
-// 3. scattered clouds
-// 4. broken clouds
-// 5. light rain
-// 6. rain
-// 7. thunderstorm
-// 8. thunderstorm with rain
-// 9. heavy rain
-// 10. snow
-// 11. mist/fog
-
-//Extra Details
-// 1. Sunrise
-// 2. Sunset
-// 3. Max TEmp
-// 4. Min Temp
-// 5. Humidity
-// 6. Wind Speed
-
-// import moment from 'moment-timezone';
-
-//
