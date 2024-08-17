@@ -2,6 +2,7 @@
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+  /* background-color: #333744; */
 }
 
 .video-background {
@@ -11,10 +12,10 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    z-index: -1;
+    z-index: -99;
     opacity: 0.9; 
   }
 
-.weather-details {
-    background-color: rgba(255, 255, 255, 0.163);
+input {
+  border: 6px solid white;
 }

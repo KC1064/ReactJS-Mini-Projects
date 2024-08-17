@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
+import { WeatherSvg } from "weather-icons-animated";
+import moment from "moment";
+import "moment-timezone";
+import Footer from "./Footer";
 
 const App = () => {
   const [place, setPlace] = useState("");
   const [weather, setWeather] = useState({});
   const [error, setError] = useState(false);
   const [time, setTime] = useState("");
+  const [dayName, setDayName] = useState("");
   const [DayNight, setDayNight] = useState("");
 
   const api = {
@@ -23,7 +28,6 @@ const App = () => {
           return res.json();
         })
         .then((data) => {
-          console.log(data);
           setWeather(data);
           setError(false);
           setPlace("");
@@ -43,31 +47,77 @@ const App = () => {
       getCurrentTime();
       DayOrNight();
     }
-  }, [weather]); // Run these functions whenever the weather state changes
+    getDayName();
+  }, [weather]);
 
-  const getVideoSource = () => {
-    if (!place || !weather.weather || weather.weather.length === 0) {
-      return "src/assets/default-2.mp4";
-    } else {
-      const description = weather.weather[0].description.toLowerCase();
-      if (description.includes("rain")) {
-        return "src/assets/rainy-weather.mp4";
-      } else if (description.includes("clear")) {
-        return "src/assets/clear-sky.mp4";
-      } else {
-        return "src/assets/default.mp4";
-      }
+  const getstate = () => {
+    if (!weather.weather || weather.weather.length === 0) {
+      return "windy";
     }
+
+    const description = weather.weather[0].description.toLowerCase();
+    if (description.includes("clear")) return "sunny";
+    if (description.includes("few clouds")) return "partlycloudy";
+    if (description.includes("scattered clouds")) return "partlycloudy";
+    if (description.includes("broken clouds")) return "cloudy";
+    if (description.includes("light rain")) return "rainy";
+    if (description.includes("rain")) return "pouring";
+    if (description.includes("thunderstorm with rain"))
+      return "lightning-rainy";
+    if (description.includes("thunderstorm")) return "lightning";
+    if (description.includes("heavy rain")) return "pouring";
+    if (description.includes("snow")) return "snowy";
+    if (
+      description.includes("mist") ||
+      description.includes("fog") ||
+      description.includes("haze")
+    )
+      return "fog";
+
+    return "windy"; // Default case
   };
 
   const getCurrentTime = () => {
     if (weather.dt && weather.timezone) {
-      const timestamp = weather.dt * 1000;
-      const localTime = new Date(timestamp + weather.timezone * 1000);
-      setTime(localTime.toLocaleString());
+      const utcTime = moment.unix(weather.dt); // Convert UNIX timestamp to UTC
+      const localTime = utcTime.utcOffset(weather.timezone / 60); // Adjust with timezone
+
+      const timeString = localTime.format("HH:mm A");
+      setTime(timeString);
+
+      console.log(`The current local time in ${weather.name} is ${timeString}`);
     } else {
       setTime("Time not available");
     }
+  };
+
+  const greet = () => {
+    const currentHour = new Date(`1970-01-01T${time}:00`).getHours();
+    if (currentHour < 12) {
+      return "Good Morning";
+    } else if (currentHour >= 12 && currentHour < 16) {
+      return "Good Afternoon";
+    } else if (currentHour >= 16 && currentHour < 18.5) {
+      return "Good Evening";
+    } else {
+      return "Good Night";
+    }
+  };
+
+  const getDayName = () => {
+    const currentDate = new Date();
+    const dayNumber = currentDate.getDay();
+    const daysOfWeek = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    const dayName = daysOfWeek[dayNumber];
+    setDayName(dayName);
   };
 
   const DayOrNight = () => {
@@ -88,9 +138,9 @@ const App = () => {
     }
   };
 
-  // ---------------------------------------------------------------
   return (
     <div
+      className="bg-[#333744]"
       style={{
         position: "relative",
         height: "100vh",
@@ -98,11 +148,6 @@ const App = () => {
         color: "black",
       }}
     >
-      <video autoPlay muted loop className="video-background">
-        <source src={getVideoSource()} type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-
       <div className="input-field flex justify-center">
         <input
           type="text"
@@ -110,30 +155,59 @@ const App = () => {
           onChange={(e) => setPlace(e.target.value)}
           value={place}
           onKeyDown={searchWeather}
-          className="h-8 w-[300px] mt-2 border border-slate-950 rounded-lg p-2 focus:outline-none focus:border-blue-500"
+          className="h-12 w-[300px] mt-4 border bg-slate-400 border-white rounded-2xl text-blue-50 pl-4 text-xl font-bold"
         />
       </div>
-
-      {error ? (
-        <p>City not found</p>
-      ) : (
-        weather.main && (
-          <div className="h-[700px] w-[100%] flex justify-center items-center">
-            <div className="weather-details h-[200px] w-[300px] bg-slate-600 backdrop-blur-xl bg-opacity-30 border border-slate-300 rounded-lg flex flex-col justify-center items-center">
-              <p className="opacity-100 text-white">
-                <span className="text-6xl">{weather.main.temp}</span>
-                <span className="relative text-2xl top-[-26px]">°C</span>
-              </p>
-              <p>{weather.name},{weather.sys.country}</p>
-              <p className="opacity-100 text-white mt-2 pr-3">
-                {weather.weather[0].description.toUpperCase()}
-              </p>
-              <p className="opacity-100 text-white">Current Time: {time}</p>
-              {/* <p>Now it's {DayNight}</p> */}
+      <div className="h-[780px] w-[100%]">
+        {error ? (
+          <p>City not found</p>
+        ) : (
+          weather.main &&
+          weather.weather &&
+          weather.weather.length > 0 && (
+            <div className="">
+              <div className="h-[780px] mt-6 w-[100%] flex justify-center items-center">
+                <div className="weather-details h-[740px] w-[96%] border border-slate-300 rounded-lg backdrop-blur-xl bg-opacity-30 bg-slate-500 flex flex-col items-center">
+                  <div className="place-date text-white mt-8 flex flex-col items-center">
+                    <p className="text-5xl">{weather.name}</p>
+                    <p className="mt-2 text-xl">
+                      {dayName.toUpperCase()}
+                      <span> {time}</span>
+                    </p>
+                  </div>
+                  <div className="h-[250px] w-[250px]">
+                    <WeatherSvg
+                      state={getstate()}
+                      night={DayNight === "night"}
+                    />
+                  </div>
+                  <p className="text-white">
+                    <span className="text-6xl">{weather.main.temp}</span>
+                    <span className="relative text-2xl top-[-26px]">°C</span>
+                  </p>
+                  <p className="opacity-100 text-white mt-2 pr-3 text-2xl">
+                    {weather.weather[0].description.toUpperCase()}
+                  </p>
+                  <p className="text-lg text-white">{greet()}</p>
+                  <div className="h-[300px] w-[95%] border-white flex gap-[90px] mt-4 justify-center">
+                    <div className="text-white text-xl flex flex-col gap-3">
+                      <p>Humidity: 76%</p>
+                      <p>Humidity: 76%</p>
+                      <p>Humidity: 76%</p>
+                    </div>
+                    <div className="text-white text-xl flex flex-col gap-3">
+                      <p>Humidity: 76%</p>
+                      <p>Humidity: 76%</p>
+                      <p>Humidity: 76%</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        )
-      )}
+          )
+        )}
+      </div>
+      <Footer></Footer>
     </div>
   );
 };
@@ -166,3 +240,7 @@ export default App;
 // 4. Min Temp
 // 5. Humidity
 // 6. Wind Speed
+
+// import moment from 'moment-timezone';
+
+//
