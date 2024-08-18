@@ -3,14 +3,18 @@ import "./App.css";
 import { WeatherSvg } from "weather-icons-animated";
 import moment from "moment";
 import "moment-timezone";
-import Footer from "./Footer";
+import { DarkModeSwitch } from "react-toggle-dark-mode";
 
 const App = () => {
+  const [isDarkMode, setDarkMode] = useState(true);
+  const toggleDarkMode = (checked) => setDarkMode(checked);
+
   const [place, setPlace] = useState("");
   const [weather, setWeather] = useState({});
   const [error, setError] = useState(false);
   const [time, setTime] = useState("");
   const [dayName, setDayName] = useState("");
+  const [date, setDate] = useState("");
   const [DayNight, setDayNight] = useState("");
 
   const api = {
@@ -22,16 +26,13 @@ const App = () => {
     if (e.key === "Enter") {
       fetch(`${api.base}weather?q=${place}&units=metric&APPID=${api.key}`)
         .then((res) => {
-          if (!res.ok) {
-            throw new Error("City not found");
-          }
+          if (!res.ok) throw new Error("City not found");
           return res.json();
         })
         .then((data) => {
           setWeather(data);
           setError(false);
           setPlace("");
-          console.log(data);
         })
         .catch((err) => {
           console.error(err);
@@ -47,46 +48,49 @@ const App = () => {
     if (weather.main) {
       getCurrentTime();
       DayOrNight();
+      getDayName();
     }
-    getDayName();
   }, [weather]);
 
   const getstate = () => {
-    if (!weather.weather || weather.weather.length === 0) {
-      return "windy";
-    }
-
+    if (!weather.weather || weather.weather.length === 0) return "windy";
+  
     const description = weather.weather[0].description.toLowerCase();
-    if (description.includes("clear")) return "sunny";
-    if (description.includes("few clouds")) return "partlycloudy";
-    if (description.includes("scattered clouds")) return "partlycloudy";
-    if (description.includes("broken clouds")) return "cloudy";
-    if (description.includes("light rain")) return "rainy";
-    if (description.includes("rain")) return "pouring";
-    if (description.includes("thunderstorm with rain"))
-      return "lightning-rainy";
-    if (description.includes("thunderstorm")) return "lightning";
-    if (description.includes("heavy rain")) return "pouring";
-    if (description.includes("snow")) return "snowy";
-    if (
-      description.includes("mist") ||
-      description.includes("fog") ||
-      description.includes("haze")
-    )
-      return "fog";
-
-    return "windy"; // Default case
+  
+    switch (true) {
+      case description.includes("clear"):
+        return "sunny";
+      case description.includes("few clouds") || description.includes("scattered clouds"):
+        return "partlycloudy";
+      case description.includes("broken clouds"):
+        return "cloudy";
+      case description.includes("light rain"):
+        return "rainy";
+      case description.includes("heavy rain"):
+        return "pouring";
+      case description.includes("thunderstorm with rain"):
+        return "lightning-rainy";
+      case description.includes("thunderstorm"):
+        return "lightning";
+      case description.includes("snow"):
+        return "snowy";
+      case description.includes("mist") || description.includes("fog") || description.includes("haze"):
+        return "fog";
+      case description.includes("snow with rain"):
+        return "snowy-rainy";
+      case description.includes("hail"):
+        return "hail"
+      default:
+        return "windy";
+    }
   };
+  
 
   const getCurrentTime = () => {
     if (weather.dt && weather.timezone) {
-      const utcTime = moment.unix(weather.dt); // Convert UNIX timestamp to UTC
-      const localTime = utcTime.utcOffset(weather.timezone / 60); // Adjust with timezone
-
-      const timeString = localTime.format("HH:mm A");
-      setTime(timeString);
-
-      console.log(`The current local time in ${weather.name} is ${timeString}`);
+      const utcTime = moment.unix(weather.dt);
+      const localTime = utcTime.utcOffset(weather.timezone / 60);
+      setTime(localTime.format("HH:mm A"));
     } else {
       setTime("Time not available");
     }
@@ -94,30 +98,27 @@ const App = () => {
 
   const greet = () => {
     const currentHour = new Date(`1970-01-01T${time}:00`).getHours();
-    if (currentHour < 12) {
-      return "Good Morning";
-    } else if (currentHour >= 12 && currentHour < 16) {
-      return "Good Afternoon";
-    } else if (currentHour >= 16 && currentHour < 18.5) {
-      return "Good Evening";
-    } else {
-      return "Good Night";
-    }
+    if (currentHour < 12) return "Good Morning";
+    if (currentHour < 16) return "Good Afternoon";
+    if (currentHour < 18.5) return "Good Evening";
+    return "Good Night";
   };
 
   const getDayName = () => {
     const currentDate = new Date();
     const dayNumber = currentDate.getDay();
+    const dayOfMonth = currentDate.getDate();
+    const month = currentDate.getMonth() + 1; // Months are 0-based
+    const year = currentDate.getFullYear();
+
     const daysOfWeek = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
+      "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
     ];
+
     const dayName = daysOfWeek[dayNumber];
+    const dateString = `${dayOfMonth < 10 ? '0' : ''}${dayOfMonth}/${month < 10 ? '0' : ''}${month}/${year}`;
+
+    setDate(dateString);
     setDayName(dayName);
   };
 
@@ -139,85 +140,92 @@ const App = () => {
     }
   };
 
-  const formatTime = (timestamp) => {
-    if (timestamp) {
-      return moment.unix(timestamp).format("HH:mm A");
-    }
-    return "N/A";
-  };
+  const formatTime = (timestamp) => timestamp ? moment.unix(timestamp).format("HH:mm A") : "N/A";
 
   return (
-    <div
-      className="bg-[#333744]"
-      style={{
-        position: "relative",
-        height: "100vh",
-        width: "100%",
-        color: "black",
-      }}
-    >
-      <div className="input-field flex justify-center">
+    <div className={`${isDarkMode ? "bg-[#333744]" : "bg-[#d8e2ee]"}`} style={{ position: "relative", height: "100vh", width: "100%", color: isDarkMode ? "white" : "black" }}>
+      <div className="input-field flex justify-center items-center gap-6 h-[62px]">
         <input
           type="text"
           placeholder="Search..."
           onChange={(e) => setPlace(e.target.value)}
           value={place}
           onKeyDown={searchWeather}
-          className="h-12 w-[300px] mt-4 border bg-slate-400 border-white rounded-2xl text-blue-50 pl-4 text-xl font-bold"
+          className={`h-12 w-[270px] border ${isDarkMode ? "bg-[#8b96be] text-white placeholder:text-white border-white" : "bg-[#d8e2ee] text-black placeholder:text-black border-black"} rounded-2xl pl-4 text-xl font-bold mt-4`}
         />
+        <DarkModeSwitch checked={isDarkMode} onChange={toggleDarkMode} size={50} className="mt-3" />
       </div>
-      <div className="h-[780px] w-[100%]">
+
+      <div className="h-[] w-[100%]">
         {error ? (
           <p>City not found</p>
         ) : (
-          weather.main &&
-          weather.weather &&
-          weather.weather.length > 0 && (
-            <div className="">
-              <div className="h-[780px] mt-6 w-[100%] flex justify-center items-center">
-                <div className="weather-details h-[740px] w-[96%] border border-slate-300 rounded-lg backdrop-blur-xl bg-opacity-30 bg-slate-500 flex flex-col items-center">
-                  <div className="place-date text-white mt-4 flex flex-col items-center">
-                    <p className="text-5xl">{weather.name}</p>
-                    <p className="mt-2 text-xl">
-                      {dayName.toUpperCase()}
-                      <span> {time}</span>
+          weather.main && weather.weather && weather.weather.length > 0 && (
+            <div className="h-[830px] w-[100%] flex justify-center items-center">
+              <div className="weather-details h-[780px] w-[96%] border border-slate-300 rounded-lg backdrop-blur-3xl bg-opacity-30 bg-gray-700 flex flex-col items-center">
+                <div className="place-date text-white mt-4 flex flex-col items-center">
+                  <p className="text-5xl">{weather.name}</p>
+                  <p className="mt-2 text-xl">
+                    {dayName}
+                    <span> {time}</span>
+                  </p>
+                  <p>{date}</p>
+                </div>
+                <div className="h-[250px] w-[250px]">
+                  <WeatherSvg state={getstate()} night={DayNight === "night"} />
+                </div>
+                <p className="text-white">
+                  <span className="text-6xl">{Math.round(weather.main.temp)}</span>
+                  <span className="relative text-2xl top-[-26px] font-bold">°C</span>
+                </p>
+                <p className="opacity-100 text-white mt-2 pr-3 text-2xl">
+                  {weather.weather[0].description.toUpperCase()}
+                </p>
+                <p className="text-lg text-white">{greet()}</p>
+                <div className={`h-[240px] w-[94%] attributes flex gap-[25px] mt-6 justify-center mb-3 items-center rounded-xl backdrop-blur-3xl bg-opacity-5 ${isDarkMode ? "border-white bg-white" : "border-black bg-gray-500"}`}>
+                  <div className="w-[45%] h-[180px] flex flex-col items-start justify-between">
+                    <p className="flex gap-2 ml-4 items-center">
+                      <img src="./src/assets/feels-like-light.svg" alt="feels like" className="h-[35px] w-[35px]" />
+                      {Math.round(weather.main.feels_like)} °C
+                    </p>
+                    <p className="flex gap-2 ml-4 items-center">
+                      <img src="src/assets/max-temp-light.svg" alt="max temp" className="h-[35px] w-[35px]" />
+                      {Math.round(weather.main.temp_max)} °C
+                    </p>
+                    <p className="flex gap-2 ml-4 items-center">
+                      <img src="src/assets/sunrise-light.svg" alt="Sunrise" className="h-[35px] w-[35px]" />
+                      {formatTime(weather.sys.sunrise)}
+                    </p>
+                    <p className="flex gap-2 ml-4 items-center">
+                      <img src="src/assets/pressure-light.svg" alt="Pressure" className="h-[35px] w-[35px]" />
+                      {Math.round(weather.main.pressure / 1000)} bar
                     </p>
                   </div>
-                  <div className="h-[250px] w-[250px]">
-                    <WeatherSvg
-                      state={getstate()}
-                      night={DayNight === "night"}
-                    />
-                  </div>
-                  <p className="text-white">
-                    <span className="text-6xl">{weather.main.temp}</span>
-                    <span className="relative text-2xl top-[-26px]">°C</span>
-                  </p>
-                  <p className="opacity-100 text-white mt-2 pr-3 text-2xl">
-                    {weather.weather[0].description.toUpperCase()}
-                  </p>
-                  <p className="text-lg text-white">{greet()}</p>
-                  <div className="h-[200px] w-[94%] attributes border-white flex gap-[70px] mt-6 justify-center items-center">
-                    <div className="text-white text-lg flex flex-col gap-2">
-                      <p>Feels Like: {weather.main.feels_like}</p>
-                      <p>Max Temp: {weather.main.temp_max}</p>
-                      <p>Sunrise: {formatTime(weather.sys.sunrise)}</p>
-                      <p>Pressure: {weather.main.pressure}</p>
-                    </div>
-                    <div className="text-white text-lg flex flex-col gap-2">
-                      <p>Humidity: {weather.main.humidity}</p>
-                      <p>Min Temp: {weather.main.temp_min}</p>
-                      <p>Sunset: {formatTime(weather.sys.sunset)}</p>
-                      <p>Wind Speed: {weather.wind.speed}</p>
-                    </div>
+                  <div className="w-[45%] h-[180px] flex flex-col items-start justify-between ">
+                    <p className="flex gap-2 ml-[36px] items-center">
+                      <img src="src/assets/humidity-light.svg" alt="" className="h-[35px] w-[35px]" />
+                      {weather.main.humidity} %
+                    </p>
+                    <p className="flex gap-2 ml-[36px] items-center">
+                      <img src="src/assets/min-temp-light.svg" alt="" className="h-[35px] w-[35px]" />
+                      {Math.round(weather.main.temp_min)} °C
+                    </p>
+                    <p className="flex gap-2 ml-[36px] items-center">
+                      <img src="src/assets/sunset-light.svg" alt="" className="h-[35px] w-[35px]" />
+                      {formatTime(weather.sys.sunset)}
+                    </p>
+                    <p className="flex gap-2 ml-[36px] items-center">
+                      <img src="src/assets/wind-light.svg" alt="" className="h-[35px] w-[35px]" />
+                      {Math.round(weather.wind.speed)} km/h
+                    </p>
                   </div>
                 </div>
-              </div>
+              </div>            
             </div>
           )
         )}
       </div>
-      <Footer></Footer>
+      
     </div>
   );
 };
