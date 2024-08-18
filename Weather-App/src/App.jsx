@@ -1,21 +1,23 @@
+// App.js
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import { WeatherSvg } from "weather-icons-animated";
 import moment from "moment";
 import "moment-timezone";
 import { DarkModeSwitch } from "react-toggle-dark-mode";
+import Loader from "./Loader";
 
 const App = () => {
   const [isDarkMode, setDarkMode] = useState(true);
   const toggleDarkMode = (checked) => setDarkMode(checked);
-
+  const [loading, setLoading] = useState(false);
   const [place, setPlace] = useState("");
   const [weather, setWeather] = useState({});
   const [error, setError] = useState(false);
   const [time, setTime] = useState("");
   const [dayName, setDayName] = useState("");
   const [date, setDate] = useState("");
-  const [DayNight, setDayNight] = useState("");
+  const [dayNight, setDayNight] = useState("");
 
   const api = {
     key: "f26ea544dee72277c7a29a742501e2a3",
@@ -24,23 +26,29 @@ const App = () => {
 
   const searchWeather = (e) => {
     if (e.key === "Enter") {
-      fetch(`${api.base}weather?q=${place}&units=metric&APPID=${api.key}`)
-        .then((res) => {
-          if (!res.ok) throw new Error("City not found");
-          return res.json();
-        })
-        .then((data) => {
-          setWeather(data);
-          setError(false);
-          setPlace("");
-        })
-        .catch((err) => {
-          console.error(err);
-          setError(true);
-          setWeather({});
-          setTime("");
-          setDayNight("");
-        });
+      setLoading(true);
+      setTimeout(() => {
+        fetch(`${api.base}weather?q=${place}&units=metric&APPID=${api.key}`)
+          .then((res) => {
+            if (!res.ok) throw new Error("City not found");
+            return res.json();
+          })
+          .then((data) => {
+            setWeather(data);
+            setError(false);
+            setPlace("");
+          })
+          .catch((err) => {
+            console.error(err);
+            setError(true);
+            setWeather({});
+            setTime("");
+            setDayNight("");
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      }, 1000);
     }
   };
 
@@ -54,9 +62,9 @@ const App = () => {
 
   const getstate = () => {
     if (!weather.weather || weather.weather.length === 0) return "windy";
-  
+
     const description = weather.weather[0].description.toLowerCase();
-  
+
     switch (true) {
       case description.includes("clear"):
         return "sunny";
@@ -79,12 +87,13 @@ const App = () => {
       case description.includes("snow with rain"):
         return "snowy-rainy";
       case description.includes("hail"):
-        return "hail"
+        return "hail";
+        case description.includes("moderate rain"):
+          return "rainy";
       default:
         return "windy";
     }
   };
-  
 
   const getCurrentTime = () => {
     if (weather.dt && weather.timezone) {
@@ -108,7 +117,7 @@ const App = () => {
     const currentDate = new Date();
     const dayNumber = currentDate.getDay();
     const dayOfMonth = currentDate.getDate();
-    const month = currentDate.getMonth() + 1; // Months are 0-based
+    const month = currentDate.getMonth() + 1; 
     const year = currentDate.getFullYear();
 
     const daysOfWeek = [
@@ -153,79 +162,84 @@ const App = () => {
           onKeyDown={searchWeather}
           className={`h-12 w-[270px] border ${isDarkMode ? "bg-[#8b96be] text-white placeholder:text-white border-white" : "bg-[#d8e2ee] text-black placeholder:text-black border-black"} rounded-2xl pl-4 text-xl font-bold mt-4`}
         />
-        <DarkModeSwitch checked={isDarkMode} onChange={toggleDarkMode} size={50} className="mt-3" />
+        <DarkModeSwitch checked={isDarkMode} onChange={toggleDarkMode} size={45} className="mt-3" />
       </div>
 
-      <div className="h-[] w-[100%]">
-        {error ? (
-          <p>City not found</p>
+      <div className="relative">
+        {loading ? (
+          <div className="flex justify-center items-center h-screen w-screen">
+            <Loader />
+          </div>
         ) : (
-          weather.main && weather.weather && weather.weather.length > 0 && (
-            <div className="h-[830px] w-[100%] flex justify-center items-center">
-              <div className="weather-details h-[780px] w-[96%] border border-slate-300 rounded-lg backdrop-blur-3xl bg-opacity-30 bg-gray-700 flex flex-col items-center">
-                <div className="place-date text-white mt-4 flex flex-col items-center">
-                  <p className="text-5xl">{weather.name}</p>
-                  <p className="mt-2 text-xl">
-                    {dayName}
-                    <span> {time}</span>
+          error ? (
+            <p>City not found</p>
+          ) : (
+            weather.main && weather.weather && weather.weather.length > 0 && (
+              <div className="h-[830px] w-[100%] flex justify-center items-center">
+                <div className="weather-details h-[780px] w-[96%] border border-slate-300 rounded-lg backdrop-blur-3xl bg-opacity-30 bg-gray-700 flex flex-col items-center">
+                  <div className="place-date text-white mt-4 flex flex-col items-center">
+                    <p className="text-5xl">{weather.name}</p>
+                    <p className="mt-2 text-xl">
+                      {dayName.toUpperCase()}
+                      <span> {time}</span>
+                    </p>
+                    <p>{date}</p>
+                  </div>
+                  <div className="h-[250px] w-[250px]">
+                    <WeatherSvg state={getstate()} night={dayNight === "night"} />
+                  </div>
+                  <p className="text-white">
+                    <span className="text-6xl">{Math.round(weather.main.temp)}</span>
+                    <span className="relative text-2xl top-[-26px] font-bold">°C</span>
                   </p>
-                  <p>{date}</p>
-                </div>
-                <div className="h-[250px] w-[250px]">
-                  <WeatherSvg state={getstate()} night={DayNight === "night"} />
-                </div>
-                <p className="text-white">
-                  <span className="text-6xl">{Math.round(weather.main.temp)}</span>
-                  <span className="relative text-2xl top-[-26px] font-bold">°C</span>
-                </p>
-                <p className="opacity-100 text-white mt-2 pr-3 text-2xl">
-                  {weather.weather[0].description.toUpperCase()}
-                </p>
-                <p className="text-lg text-white">{greet()}</p>
-                <div className={`h-[240px] w-[94%] attributes flex gap-[25px] mt-6 justify-center mb-3 items-center rounded-xl backdrop-blur-3xl bg-opacity-5 ${isDarkMode ? "border-white bg-white" : "border-black bg-gray-500"}`}>
-                  <div className="w-[45%] h-[180px] flex flex-col items-start justify-between">
-                    <p className="flex gap-2 ml-4 items-center">
-                      <img src="./src/assets/feels-like-light.svg" alt="feels like" className="h-[35px] w-[35px]" />
-                      {Math.round(weather.main.feels_like)} °C
-                    </p>
-                    <p className="flex gap-2 ml-4 items-center">
-                      <img src="src/assets/max-temp-light.svg" alt="max temp" className="h-[35px] w-[35px]" />
-                      {Math.round(weather.main.temp_max)} °C
-                    </p>
-                    <p className="flex gap-2 ml-4 items-center">
-                      <img src="src/assets/sunrise-light.svg" alt="Sunrise" className="h-[35px] w-[35px]" />
-                      {formatTime(weather.sys.sunrise)}
-                    </p>
-                    <p className="flex gap-2 ml-4 items-center">
-                      <img src="src/assets/pressure-light.svg" alt="Pressure" className="h-[35px] w-[35px]" />
-                      {Math.round(weather.main.pressure / 1000)} bar
-                    </p>
-                  </div>
-                  <div className="w-[45%] h-[180px] flex flex-col items-start justify-between ">
-                    <p className="flex gap-2 ml-[36px] items-center">
-                      <img src="src/assets/humidity-light.svg" alt="" className="h-[35px] w-[35px]" />
-                      {weather.main.humidity} %
-                    </p>
-                    <p className="flex gap-2 ml-[36px] items-center">
-                      <img src="src/assets/min-temp-light.svg" alt="" className="h-[35px] w-[35px]" />
-                      {Math.round(weather.main.temp_min)} °C
-                    </p>
-                    <p className="flex gap-2 ml-[36px] items-center">
-                      <img src="src/assets/sunset-light.svg" alt="" className="h-[35px] w-[35px]" />
-                      {formatTime(weather.sys.sunset)}
-                    </p>
-                    <p className="flex gap-2 ml-[36px] items-center">
-                      <img src="src/assets/wind-light.svg" alt="" className="h-[35px] w-[35px]" />
-                      {Math.round(weather.wind.speed)} km/h
-                    </p>
+                  <p className="opacity-100 text-white mt-2 pr-3 text-2xl">
+                    {weather.weather[0].description.toUpperCase()}
+                  </p>
+                  <p className="text-lg text-white">{greet()}</p>
+                  <div className={`h-[240px] w-[94%] attributes flex gap-[25px] mt-6 justify-center mb-3 items-center rounded-xl backdrop-blur-3xl bg-opacity-5 ${isDarkMode ? "border-white bg-white" : "border-black bg-gray-500"}`}>
+                    <div className="w-[45%] h-[180px] flex flex-col items-start justify-between">
+                      <p className="flex gap-2 ml-4 items-center">
+                        <img src="./src/assets/feels-like-light.svg" alt="feels like" className="h-[35px] w-[35px]" />
+                        {Math.round(weather.main.feels_like)} °C
+                      </p>
+                      <p className="flex gap-2 ml-4 items-center">
+                        <img src="src/assets/max-temp-light.svg" alt="max temp" className="h-[35px] w-[35px]" />
+                        {Math.round(weather.main.temp_max)} °C
+                      </p>
+                      <p className="flex gap-2 ml-4 items-center">
+                        <img src="src/assets/sunrise-light.svg" alt="Sunrise" className="h-[35px] w-[35px]" />
+                        {formatTime(weather.sys.sunrise)}
+                      </p>
+                      <p className="flex gap-2 ml-4 items-center">
+                        <img src="src/assets/pressure-light.svg" alt="Pressure" className="h-[35px] w-[35px]" />
+                        {Math.round(weather.main.pressure / 1000)} bar
+                      </p>
+                    </div>
+                    <div className="w-[45%] h-[180px] flex flex-col items-start justify-between ">
+                      <p className="flex gap-2 ml-[36px] items-center">
+                        <img src="src/assets/humidity-light.svg" alt="" className="h-[35px] w-[35px]" />
+                        {weather.main.humidity} %
+                      </p>
+                      <p className="flex gap-2 ml-[36px] items-center">
+                        <img src="src/assets/min-temp-light.svg" alt="" className="h-[35px] w-[35px]" />
+                        {Math.round(weather.main.temp_min)} °C
+                      </p>
+                      <p className="flex gap-2 ml-[36px] items-center">
+                        <img src="src/assets/sunset-light.svg" alt="" className="h-[35px] w-[35px]" />
+                        {formatTime(weather.sys.sunset)}
+                      </p>
+                      <p className="flex gap-2 ml-[36px] items-center">
+                        <img src="src/assets/wind-light.svg" alt="" className="h-[35px] w-[35px]" />
+                        {Math.round(weather.wind.speed)} km/h
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>            
-            </div>
+              </div>
+            )
           )
         )}
       </div>
-      
     </div>
   );
 };
